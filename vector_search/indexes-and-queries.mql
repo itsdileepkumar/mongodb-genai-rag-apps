@@ -1,0 +1,82 @@
+db.movies.createSearchIndex(
+  "vectorPlotIndex",
+  "vectorSearch",
+  {
+     "fields": [
+        {
+           "type": "vector",
+           "path": "plot_embedding",
+           "numDimensions": 1536,
+           "similarity": "cosine"
+        }
+     ]
+  }
+);
+
+=========================================================================
+
+db.movies.createSearchIndex(
+  "vectorPlotIndex",
+  "vectorSearch",
+  {
+     "fields": [
+        {
+           "type": "vector",
+           "path": "plot_embedding",
+           "numDimensions": 1536,
+           "similarity": "cosine"
+        },
+        {
+          "type": "filter",
+          "path": "year"
+        }
+     ]
+  }
+);
+
+=========================================================================
+pipeline = [
+    {
+        "$vectorSearch": {
+            "index": "vectorPlotIndex",
+            "path": "plot_embedding",
+            "queryVector": embedding,
+            "numCandidates": 100,
+            "limit": 10
+        }
+    },
+    {
+        "$project": {
+            "title": 1,
+            "plot": 1,
+            "score": {"$meta": "vectorSearchScore"}
+        }
+    }
+]
+
+x = collection.aggregate(pipeline)
+
+=========================================================================
+
+pipeline = [
+    {
+        "$vectorSearch": {
+            "index": "vectorPlotIndex",
+            "path": "plot_embedding",
+            "queryVector": embedding,
+            "numCandidates": 100,
+            "filter": {"year": {"$gt": 2010}},
+            "limit": 10
+        }
+    },
+    {
+        "$project": {
+            "title": 1,
+            "plot": 1,
+            "year": 1,
+            "score": {"$meta": "vectorSearchScore"}
+        }
+    }
+]
+
+x = collection.aggregate(pipeline)

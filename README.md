@@ -1,1 +1,0 @@
-# mongodb-genai-rag-apps
